@@ -412,3 +412,235 @@
     }
     
 })();
+
+// ============================================
+// CONTACT FORM HANDLERS - WITH CLEAR FUNCTIONALITY
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ========== WHATSAPP FORM ==========
+    const whatsappForm = document.getElementById('whatsappForm');
+    
+    if (whatsappForm) {
+        whatsappForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('waName').value.trim();
+            const email = document.getElementById('waEmail').value.trim();
+            const subject = document.getElementById('waSubject').value.trim();
+            const message = document.getElementById('waMessage').value.trim();
+            
+            // Validate required fields
+            if (!name || !email || !message) {
+                showToast('⚠️ Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Build WhatsApp message
+            const phoneNumber = '254714500555';
+            let whatsappMessage = `Hello! My name is ${name}.\n`;
+            whatsappMessage += `Email: ${email}\n`;
+            if (subject) whatsappMessage += `Subject: ${subject}\n`;
+            whatsappMessage += `\nMessage:\n${message}`;
+            
+            const encodedMessage = encodeURIComponent(whatsappMessage);
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            // Open WhatsApp
+            window.open(whatsappURL, '_blank');
+            
+            // Clear the form
+            clearWhatsAppForm();
+            
+            // Show success toast
+            showToast('✅ Message sent! Redirecting to WhatsApp...', 'success');
+        });
+    }
+    
+    function clearWhatsAppForm() {
+        document.getElementById('waName').value = '';
+        document.getElementById('waEmail').value = '';
+        document.getElementById('waSubject').value = '';
+        document.getElementById('waMessage').value = '';
+    }
+    
+    // ========== CV DOWNLOAD FORM ==========
+    const cvForm = document.getElementById('cvForm');
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    if (cvForm) {
+        // Real-time validation
+        function validateForm() {
+            const name = document.getElementById('cvName').value.trim();
+            const email = document.getElementById('cvEmail').value.trim();
+            const purpose = document.getElementById('cvPurpose').value;
+            const agreed = document.getElementById('cvAgree').checked;
+            
+            if (name && email && purpose && agreed) {
+                downloadBtn.disabled = false;
+                downloadBtn.style.opacity = '1';
+            } else {
+                downloadBtn.disabled = true;
+                downloadBtn.style.opacity = '0.5';
+            }
+        }
+        
+        document.getElementById('cvName').addEventListener('input', validateForm);
+        document.getElementById('cvEmail').addEventListener('input', validateForm);
+        document.getElementById('cvPurpose').addEventListener('change', validateForm);
+        document.getElementById('cvAgree').addEventListener('change', validateForm);
+        
+        // Form submit - Download CV
+        cvForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!downloadBtn.disabled) {
+                // Create download link
+                const link = document.createElement('a');
+                link.href = 'resources/docx/J-CV.pdf';
+                link.download = 'Mwangi_Josphat_Karanja_CV.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clear the form
+                clearCVForm();
+                
+                // Show success toast
+                showToast('✅ CV downloaded successfully!', 'success');
+                
+                // Update button feedback
+                downloadBtn.innerHTML = '<i class="fas fa-check"></i><span>✓ Downloaded!</span>';
+                downloadBtn.style.background = 'linear-gradient(135deg, #27ae60, #219a52)';
+                downloadBtn.disabled = true;
+                downloadBtn.style.opacity = '0.5';
+                
+                setTimeout(() => {
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i><span>Download CV</span>';
+                    downloadBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    downloadBtn.disabled = true;
+                    downloadBtn.style.opacity = '0.5';
+                }, 3000);
+            }
+        });
+    }
+    
+    function clearCVForm() {
+        document.getElementById('cvName').value = '';
+        document.getElementById('cvEmail').value = '';
+        document.getElementById('cvPurpose').value = '';
+        document.getElementById('cvAgree').checked = false;
+        
+        // Disable download button
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = '0.5';
+        }
+    }
+    
+    // ========== CLEAR FORMS ON PAGE REFRESH ==========
+    // This runs immediately when the page loads
+    function clearAllFormsOnLoad() {
+        // Clear WhatsApp form
+        const waName = document.getElementById('waName');
+        const waEmail = document.getElementById('waEmail');
+        const waSubject = document.getElementById('waSubject');
+        const waMessage = document.getElementById('waMessage');
+        
+        if (waName) waName.value = '';
+        if (waEmail) waEmail.value = '';
+        if (waSubject) waSubject.value = '';
+        if (waMessage) waMessage.value = '';
+        
+        // Clear CV form
+        const cvName = document.getElementById('cvName');
+        const cvEmail = document.getElementById('cvEmail');
+        const cvPurpose = document.getElementById('cvPurpose');
+        const cvAgree = document.getElementById('cvAgree');
+        
+        if (cvName) cvName.value = '';
+        if (cvEmail) cvEmail.value = '';
+        if (cvPurpose) cvPurpose.value = '';
+        if (cvAgree) cvAgree.checked = false;
+        
+        // Disable download button
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = '0.5';
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i><span>Download CV</span>';
+            downloadBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+        }
+    }
+    
+    // Clear forms on page load/refresh
+    clearAllFormsOnLoad();
+    
+    // ========== TOAST NOTIFICATION SYSTEM ==========
+    function showToast(message, type = 'info') {
+        // Remove existing toasts
+        const existingToasts = document.querySelectorAll('.toast-notification');
+        if (existingToasts.length > 3) {
+            existingToasts[0].remove();
+        }
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        const iconMap = {
+            success: '✅',
+            error: '⚠️',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+        const icon = iconMap[type] || 'ℹ️';
+        
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-content">
+                <div class="toast-message">${escapeHtml(message)}</div>
+            </div>
+            <div class="toast-close">✕</div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Show toast with animation
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        // Close button
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        });
+        
+        // Auto-close after 3 seconds
+        setTimeout(() => {
+            if (toast && toast.parentNode) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 3000);
+    }
+    
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    
+    // ========== PREVENT FORM RESUBMISSION ON REFRESH ==========
+    // This prevents browser from repopulating form data on refresh
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+    
+    // Also clear on beforeunload (optional - ensures clean state)
+    window.addEventListener('beforeunload', function() {
+        // Forms will be cleared on next load via clearAllFormsOnLoad()
+    });
+    
+});
